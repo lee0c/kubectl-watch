@@ -33,15 +33,23 @@ if [[ $1 = "-h" || $1 = "--help" ]]
 then
     help-text
 else
+    calls_left=60
+    # progress baar
+    pad=$( printf "\u25A1%.0s" $( seq 1 $calls_left ) )
+    progress=""
+
     while true 
     do
         response=$(kubectl get $@ 2>&1)
         for (( ; lines>0; lines-- ))
         do
-            echo -en "\r\e[1A"
+            echo -en "\r\e[1A\e[K"
         done
         echo -e "$response"
+        # append to progress bar
+        progress="$progress\u25A0"
+        printf "[%b%0.*b]\n" "$progress" $(( --calls_left * 3 )) "$pad"
         sleep 1 
-        lines=$(wc -l <<< "$response")
+        lines=$(( $(wc -l <<< "$response") + 1 ))
     done
 fi
