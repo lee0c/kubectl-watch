@@ -19,6 +19,8 @@ To use this as a [kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubect
 ln -s /path/to/kubewatch/kubewatch /usr/local/bin/kubectl-watch
 ```
 
+You can then run `kubectl plugin list` to see all available plugins, and use `kubectl watch ---` as a kubectl command.
+
 ## Use
 
 `kubectl watch` will take any arguments `kubectl get` takes. It additionally adds a few options which **must be specified before any standard kubectl arguments**. Arguments that require values are shown with their default value.
