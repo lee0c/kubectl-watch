@@ -4,7 +4,7 @@ help-text() {
 cat << END
 Watches kubernetes resources.
 Author: Lee Cattarin - github.com/lee0c
-v0.1.0
+v0.1.1
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
@@ -12,7 +12,7 @@ Available arguments mirrors kubectl get.
 Options must be specified before standard kubectl commands.
 
 Additional options (defaults shown):
-    kubectl watch -c, --calls 60    : Make 60 calls before exiting (pass 0 to disable exiting).
+    kubectl watch -c, --calls 60    : Make 60 calls before exiting (pass 0 to disable progress bar/exiting).
     kubectl watch -s, --sleep 1     : Sleep for the specified number of seconds between calls.
     kubectl watch -h, --help        : Displays this text.
 END
