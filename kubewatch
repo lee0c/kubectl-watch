@@ -1,0 +1,47 @@
+#!/bin/bash
+
+help-text() {
+cat << END
+Watches kubernetes resources.
+Author: Lee Cattarin - github.com/lee0c
+v0.0.2
+
+Use as a kubectl action by adding this to your path under the name kubectl-watch.
+Available arguments mirrors kubectl get.
+
+Additional options:
+    kubectl watch -h, --help    : Displays this text.
+END
+}
+
+error-text() {
+cat << END
+kubectl watch requires at least one argument.
+See kubectl watch --help for more information.
+END
+}
+
+# ===
+
+if [[ $# = 0 ]]
+then
+    error-text
+    exit 0
+fi
+
+if [[ $1 = "-h" || $1 = "--help" ]]
+then
+    help-text
+else
+    while true 
+    do
+        response=$(kubectl get $@ 2>&1)
+        for (( ; lines>0; lines-- ))
+        do
+            echo -en "\r\e[1A"
+        done
+        echo -e "$response"
+        sleep 1 
+        lines=$(wc -l <<< "$response")
+    done
+fi
