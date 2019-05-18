@@ -4,7 +4,7 @@ help-text() {
 cat << END
 Watches kubernetes resources.
 Author: Lee Cattarin - github.com/lee0c
-v0.1.1
+v0.1.2
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
@@ -82,7 +82,7 @@ progress=""
 
 while true 
 do
-    if [[ USE_PROGRESS = 1 && $calls_left = 0 ]]
+    if [[ $USE_PROGRESS = 1 && $calls_left = 0 ]]
     then
         exit 0
     fi
@@ -94,7 +94,7 @@ do
     done
     echo -e "$response"
     # append to progress bar
-    if [[ USE_PROGRESS = 1 ]]
+    if [[ $USE_PROGRESS = 1 ]]
     then
         progress="$progress\u25A0"
         printf "[%b%0.*b]\n" "$progress" $(( --calls_left * 3 )) "$pad"
