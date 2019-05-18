@@ -4,19 +4,23 @@ help-text() {
 cat << END
 Watches kubernetes resources.
 Author: Lee Cattarin - github.com/lee0c
-v0.0.2
+v0.1.0
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
 
-Additional options:
-    kubectl watch -h, --help    : Displays this text.
+Options must be specified before standard kubectl commands.
+
+Additional options (defaults shown):
+    kubectl watch -c, --calls 60    : Make 60 calls before exiting (pass 0 to disable exiting).
+    kubectl watch -s, --sleep 1     : Sleep for the specified number of seconds between calls.
+    kubectl watch -h, --help        : Displays this text.
 END
 }
 
 error-text() {
 cat << END
-kubectl watch requires at least one argument.
+USAGE: kubectl watch (-h|--help) | [options] RESOURCE
 See kubectl watch --help for more information.
 END
 }
@@ -29,27 +33,74 @@ then
     exit 0
 fi
 
-if [[ $1 = "-h" || $1 = "--help" ]]
-then
-    help-text
-else
-    calls_left=60
-    # progress baar
-    pad=$( printf "\u25A1%.0s" $( seq 1 $calls_left ) )
-    progress=""
+# Defaults
+USE_PROGRESS=1
 
-    while true 
+calls_left=60
+sleeplen=1
+
+
+while [[ $# > 0 ]]
+do
+    case "$1" in
+    -h|--help)
+        help-text
+        exit 0
+        ;;
+    -c|--calls)
+        shift
+        if [[ $# > 0 && $1 =~ ^[0-9]$ ]]
+        then
+            calls_left=$1
+            if [[ $calls_left = 0 ]]; then USE_PROGRESS=0; fi
+            shift
+        else
+            error-text
+            exit 0
+        fi
+        ;;
+    -s|--sleep)
+        shift
+        if [[ $# > 0 && $1 =~ ^[0-9]$ ]]
+        then
+            sleeplen=$1
+            shift
+        else
+            error-text
+            exit 0
+        fi
+        ;;
+    *)
+        break
+        ;;
+    esac
+done 
+
+# progress baar
+pad=$( printf "\u25A1%.0s" $( seq 1 $calls_left ) )
+progress=""
+
+while true 
+do
+    if [[ USE_PROGRESS = 1 && $calls_left = 0 ]]
+    then
+        exit 0
+    fi
+
+    response=$(kubectl get $@ 2>&1)
+    for (( ; lines>0; lines-- ))
     do
-        response=$(kubectl get $@ 2>&1)
-        for (( ; lines>0; lines-- ))
-        do
-            echo -en "\r\e[1A\e[K"
-        done
-        echo -e "$response"
-        # append to progress bar
+        echo -en "\r\e[1A\e[K"
+    done
+    echo -e "$response"
+    # append to progress bar
+    if [[ USE_PROGRESS = 1 ]]
+    then
         progress="$progress\u25A0"
         printf "[%b%0.*b]\n" "$progress" $(( --calls_left * 3 )) "$pad"
-        sleep 1 
         lines=$(( $(wc -l <<< "$response") + 1 ))
-    done
-fi
+    else
+        lines=$(wc -l <<< "$response")
+    fi
+    sleep $sleeplen 
+done
