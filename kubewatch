@@ -2,9 +2,9 @@
 
 help-text() {
 cat << END
-Watches kubernetes resources.
+Watches Kubernetes resources.
 Author: Lee Cattarin - github.com/lee0c/kubewatch
-v0.2.0
+v0.2.1
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
