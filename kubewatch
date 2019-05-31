@@ -4,7 +4,7 @@ help-text() {
 cat << END
 Watches kubernetes resources.
 Author: Lee Cattarin - github.com/lee0c/kubewatch
-v0.1.3
+v0.2.0
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
@@ -36,10 +36,10 @@ fi
 # Defaults
 USE_PROGRESS=1
 
-calls_left=60
+total_calls=60
 sleeplen=1
 
-
+# check args
 while [[ $# > 0 ]]
 do
     case "$1" in
@@ -51,8 +51,8 @@ do
         shift
         if [[ $# > 0 && $1 =~ ^[0-9]$ ]]
         then
-            calls_left=$1
-            if [[ $calls_left = 0 ]]; then USE_PROGRESS=0; fi
+            total_calls=$1
+            if [[ $total_calls = 0 ]]; then USE_PROGRESS=0; fi
             shift
         else
             error-text
@@ -76,31 +76,59 @@ do
     esac
 done 
 
-# progress baar
+# progress bar & output width vars
+calls_left=$total_calls
 pad=$( printf "\u25A1%.0s" $( seq 1 $calls_left ) )
 progress=""
+columns=$(tput cols)
 
-while true 
+while true
 do
+    # exit check
     if [[ $USE_PROGRESS = 1 && $calls_left = 0 ]]
     then
         exit 0
     fi
 
     response=$(kubectl get $@ 2>&1)
-    for (( ; lines>0; lines-- ))
+    readarray -t lines <<< "$response"
+    # backtrack to the top of the output
+    for (( ; numlines>0; numlines-- ))
     do
         echo -en "\r\e[1A\e[K"
     done
+
+    # print the new output
     echo -e "$response"
-    # append to progress bar
+
+    # create & print progress bar
     if [[ $USE_PROGRESS = 1 ]]
     then
         progress="$progress\u25A0"
         printf "[%b%0.*b]\n" "$progress" $(( --calls_left * 3 )) "$pad"
-        lines=$(( $(wc -l <<< "$response") + 1 ))
-    else
-        lines=$(wc -l <<< "$response")
     fi
+
+    # calculate number of output lines
+    numlines=$(wc -l <<< $response)
+
+    # account for output being wider than the screen
+    for line in "${lines[@]}"
+    do
+        if (( $(wc -c <<< $line) > columns ))
+        then
+            (( numlines++ ))
+        fi
+    done
+
+    if [[ $USE_PROGRESS = 1 ]]
+    then
+        (( numlines++ ))
+        # account for progress bar being wider than the screen
+        if (( total_calls + 2 > columns ))
+        then
+            (( numlines++ ))
+        fi
+    fi
+
     sleep $sleeplen 
 done
