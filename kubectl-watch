@@ -4,7 +4,7 @@ help-text() {
 cat << END
 Watches Kubernetes resources.
 Author: Lee Cattarin - github.com/lee0c/kubectl-watch
-v0.2.2
+v0.3.0
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
@@ -15,6 +15,7 @@ Additional options (defaults shown):
     kubectl watch -c, --calls 60    : Make 60 calls before exiting (pass 0 to disable progress bar/exiting).
     kubectl watch -s, --sleep 1     : Sleep for the specified number of seconds between calls.
     kubectl watch -h, --help        : Displays this text.
+    kubectl watch --simple          : Force use of non-UTF-8 progress bar chars on a terminal with UTF-8 support.
 END
 }
 
@@ -35,6 +36,7 @@ fi
 
 # Defaults
 USE_PROGRESS=1
+SIMPLE_PROGRESS=0
 
 total_calls=60
 sleeplen=1
@@ -70,15 +72,29 @@ do
             exit 0
         fi
         ;;
+    --simple)
+        shift
+        SIMPLE_PROGRESS=1
+        ;;
     *)
         break
         ;;
     esac
-done 
+done
 
 # progress bar & output width vars
 calls_left=$total_calls
+
+prog_full="\u25A0"
 pad=$( printf "\u25A1%.0s" $( seq 1 $calls_left ) )
+
+if [[ ! $(echo -en $prog_full | wc -m) = 1 || $SIMPLE_PROGRESS = 1 ]]
+then
+    prog_full="#"
+    pad=$( printf ".%.0s" $( seq 1 $calls_left ) )
+fi
+
+byte_size=$(echo -en $prog_full | wc -c)
 progress=""
 columns=$(tput cols)
 
@@ -104,8 +120,8 @@ do
     # create & print progress bar
     if [[ $USE_PROGRESS = 1 ]]
     then
-        progress="$progress\u25A0"
-        printf "[%b%0.*b]\n" "$progress" $(( --calls_left * 3 )) "$pad"
+        progress="$progress$prog_full"
+        printf "[%b%0.*b]\n" "$progress" $(( --calls_left * byte_size )) "$pad"
     fi
 
     # calculate number of output lines
