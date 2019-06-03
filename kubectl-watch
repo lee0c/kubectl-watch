@@ -15,7 +15,7 @@ Additional options (defaults shown):
     kubectl watch -c, --calls 60    : Make 60 calls before exiting (pass 0 to disable progress bar/exiting).
     kubectl watch -s, --sleep 1     : Sleep for the specified number of seconds between calls.
     kubectl watch -h, --help        : Displays this text.
-    kubectl watch --simple          : Force use of non-UTF-8 progress bar chars on a terminal with UTF-8 support.
+    kubectl watch --simple          : Forces use of non-UTF-8 progress bar chars on a terminal with UTF-8 support.
 END
 }
 

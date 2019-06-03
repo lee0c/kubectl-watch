@@ -24,6 +24,7 @@ You can then run `kubectl plugin list` to confirm that this is available as a ku
 | -c, --calls 60 | Make 60 calls before exiting (pass 0 to disable progress bar/exiting) |
 | -s, --sleep 1 | Sleep for the specified number of seconds between calls |
 | -h, --help | Displays help text. |
+| --simple | Force use of non-UTF-8 progress bar chars on a terminal with UTF-8 support. |
 
 ## Notes
 
