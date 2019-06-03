@@ -1,4 +1,4 @@
-# kubectl-watch
+# kubectl-watch :eyes:
 
 Kubernetes CLI plugin for better resource watching output.
 
