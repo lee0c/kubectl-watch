@@ -1,6 +1,6 @@
 # kubectl-watch :eyes:
 
-Kubernetes CLI plugin for better resource watching output.
+[Kubernetes CLI plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) for better resource watching output.
 
 ![alt text](./kubectl-watch.gif)
 
@@ -13,13 +13,7 @@ chmod +x kubectl-watch
 ln -s /path/to/kubectl-watch/kubectl-watch /usr/local/bin/kubectl-watch
 ```
 
-To use this as a [kubectl plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) (recommended), change the last command:
-
-```bash
-ln -s /path/to/kubectl-watch/kubectl-watch /usr/local/bin/kubectl-watch
-```
-
-You can then run `kubectl plugin list` to see all available plugins, and use `kubectl watch ---` as a kubectl command.
+You can then run `kubectl plugin list` to confirm that this is available as a kubectl plugin, and use `kubectl watch ---` as a kubectl command.
 
 ## Use
 
