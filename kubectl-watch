@@ -3,8 +3,8 @@
 help-text() {
 cat << END
 Watches Kubernetes resources.
-Author: Lee Cattarin - github.com/lee0c/kubewatch
-v0.2.1
+Author: Lee Cattarin - github.com/lee0c/kubectl-watch
+v0.2.2
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
