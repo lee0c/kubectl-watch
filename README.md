@@ -2,7 +2,7 @@
 
 [Kubernetes CLI plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) for better resource watching output.
 
-![alt text](./kubectl-watch.gif)
+![GIF of the plugin in use, showing information about the pods of a Prometheus deployment updating on the console](./kubectl-watch.gif)
 
 ## Installation
 
