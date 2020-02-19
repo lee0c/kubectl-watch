@@ -4,7 +4,7 @@ help-text() {
 cat << END
 Watches Kubernetes resources.
 Author: Lee Cattarin - github.com/lee0c/kubectl-watch
-v0.4.1
+v0.4.2
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
@@ -109,13 +109,12 @@ do
 
     response=$(kubectl get $@ 2>&1)
 
+	# read response into array of lines
 	lines=()
 	while IFS=\n read line
 	do
 		lines+=($line)
 	done <<< $response
-    
-	# readarray -t lines <<< "$response"
     
 	# backtrack to the top of the output
     for (( ; numlines>0; numlines-- ))
