@@ -4,7 +4,7 @@ help-text() {
 cat << END
 Watches Kubernetes resources.
 Author: Lee Cattarin - github.com/lee0c/kubectl-watch
-v0.4.0
+v0.4.1
 
 Use as a kubectl action by adding this to your path under the name kubectl-watch.
 Available arguments mirrors kubectl get.
@@ -96,7 +96,6 @@ fi
 
 byte_size=$(echo -en $prog_full | wc -c)
 progress=""
-columns=$(tput cols)
 
 while true
 do
@@ -105,6 +104,8 @@ do
     then
         exit 0
     fi
+
+	columns=$(tput cols)
 
     response=$(kubectl get $@ 2>&1)
 
