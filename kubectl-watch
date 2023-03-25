@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+kubectl() {
+  if [[ -z "$NO_COLOR" ]] && command -v kubecolor &>/dev/null
+  then
+    kubecolor --force-colors "$@"
+  else
+    command kubectl "$@"
+  fi
+}
+
 help-text() {
 cat << END
 Watches Kubernetes resources.
