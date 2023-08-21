@@ -116,7 +116,7 @@ do
 
 	columns=$(tput cols)
 
-    response=$(kubectl get $@ 2>&1)
+    response=$(kubectl get "$@" 2>&1)
 
 	# read response into array of lines
 	lines=()
