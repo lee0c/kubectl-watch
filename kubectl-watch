@@ -3,9 +3,9 @@
 kubectl() {
   if [[ -z "$NO_COLOR" ]] && command -v kubecolor &>/dev/null
   then
-    kubecolor --force-colors "$@"
+  kubecolor --force-colors "$@"
   else
-    command kubectl "$@"
+  command kubectl "$@"
   fi
 }
 
@@ -21,10 +21,10 @@ Available arguments mirrors kubectl get.
 Options must be specified before standard kubectl commands.
 
 Additional options (defaults shown):
-    kubectl watch -c, --calls 60    : Make 60 calls before exiting (pass 0 to disable progress bar/exiting).
-    kubectl watch -s, --sleep 1     : Sleep for the specified number of seconds between calls.
-    kubectl watch -h, --help        : Displays this text.
-    kubectl watch --simple          : Forces use of non-UTF-8 progress bar chars on a terminal with UTF-8 support.
+  kubectl watch -c, --calls 60  : Make 60 calls before exiting (pass 0 to disable progress bar/exiting).
+  kubectl watch -s, --sleep 1   : Sleep for the specified number of seconds between calls.
+  kubectl watch -h, --help    : Displays this text.
+  kubectl watch --simple      : Forces use of non-UTF-8 progress bar chars on a terminal with UTF-8 support.
 END
 }
 
@@ -39,8 +39,8 @@ END
 
 if [[ $# = 0 ]]
 then
-    error-text
-    exit 0
+  error-text
+  exit 0
 fi
 
 # Defaults
@@ -53,42 +53,42 @@ sleeplen=1
 # check args
 while [[ $# -gt 0 ]]
 do
-    case "$1" in
-    -h|--help)
-        help-text
-        exit 0
-        ;;
-    -c|--calls)
-        shift
-        if [[ $# -gt 0 && $1 =~ ^[0-9]$ ]]
-        then
-            total_calls=$1
-            if [[ $total_calls = 0 ]]; then USE_PROGRESS=0; fi
-            shift
-        else
-            error-text
-            exit 0
-        fi
-        ;;
-    -s|--sleep)
-        shift
-        if [[ $# -gt 0 && $1 =~ ^[0-9]$ ]]
-        then
-            sleeplen=$1
-            shift
-        else
-            error-text
-            exit 0
-        fi
-        ;;
-    --simple)
-        shift
-        SIMPLE_PROGRESS=1
-        ;;
-    *)
-        break
-        ;;
-    esac
+  case "$1" in
+  -h|--help)
+    help-text
+    exit 0
+    ;;
+  -c|--calls)
+    shift
+    if [[ $# -gt 0 && $1 =~ ^[0-9]$ ]]
+    then
+      total_calls=$1
+      if [[ $total_calls = 0 ]]; then USE_PROGRESS=0; fi
+      shift
+    else
+      error-text
+      exit 0
+    fi
+    ;;
+  -s|--sleep)
+    shift
+    if [[ $# -gt 0 && $1 =~ ^[0-9]$ ]]
+    then
+      sleeplen=$1
+      shift
+    else
+      error-text
+      exit 0
+    fi
+    ;;
+  --simple)
+    shift
+    SIMPLE_PROGRESS=1
+    ;;
+  *)
+    break
+    ;;
+  esac
 done
 
 # progress bar & output width vars
@@ -99,8 +99,8 @@ pad=$(printf "\u25A1%.0s" "$(seq 1 "$calls_left")")
 
 if [[ ! $(echo -en "$prog_full" | wc -m) = 1 || $SIMPLE_PROGRESS = 1 ]]
 then
-    prog_full="#"
-    pad=$(printf ".%.0s" "$(seq 1 "$calls_left")")
+  prog_full="#"
+  pad=$(printf ".%.0s" "$(seq 1 "$calls_left")")
 fi
 
 byte_size=$(echo -en $prog_full | wc -c)
@@ -108,60 +108,60 @@ progress=""
 
 while true
 do
-    # exit check
-    if [[ $USE_PROGRESS = 1 && $calls_left = 0 ]]
+  # exit check
+  if [[ $USE_PROGRESS = 1 && $calls_left = 0 ]]
+  then
+    exit 0
+  fi
+
+  columns=$(tput cols)
+
+  response=$(kubectl get "$@" 2>&1)
+
+  # read response into array of lines
+  lines=()
+  while IFS=$'\n' read -r line
+  do
+    lines+=("$line")
+  done <<< "$response"
+
+  # backtrack to the top of the output
+  for (( ; numlines>0; numlines-- ))
+  do
+    echo -en "\r\e[1A\e[K"
+  done
+
+  # print the new output
+  echo -e "$response"
+
+  # create & print progress bar
+  if [[ $USE_PROGRESS = 1 ]]
+  then
+    progress="${progress}${prog_full}"
+    printf "[%b%0.*b]\n" "$progress" $(( --calls_left * byte_size )) "$pad"
+  fi
+
+  # calculate number of output lines
+  numlines=$(wc -l <<< "$response")
+
+  # account for output being wider than the screen
+  for line in "${lines[@]}"
+  do
+    if (( $(wc -c <<< "$line") > columns ))
     then
-        exit 0
+      (( numlines++ ))
     fi
+  done
 
-    columns=$(tput cols)
-
-    response=$(kubectl get "$@" 2>&1)
-
-    # read response into array of lines
-    lines=()
-    while IFS=$'\n' read -r line
-    do
-        lines+=("$line")
-    done <<< "$response"
-
-    # backtrack to the top of the output
-    for (( ; numlines>0; numlines-- ))
-    do
-        echo -en "\r\e[1A\e[K"
-    done
-
-    # print the new output
-    echo -e "$response"
-
-    # create & print progress bar
-    if [[ $USE_PROGRESS = 1 ]]
+  if [[ $USE_PROGRESS = 1 ]]
+  then
+    (( numlines++ ))
+    # account for progress bar being wider than the screen
+    if (( total_calls + 2 > columns ))
     then
-        progress="${progress}${prog_full}"
-        printf "[%b%0.*b]\n" "$progress" $(( --calls_left * byte_size )) "$pad"
+      (( numlines++ ))
     fi
+  fi
 
-    # calculate number of output lines
-    numlines=$(wc -l <<< "$response")
-
-    # account for output being wider than the screen
-    for line in "${lines[@]}"
-    do
-        if (( $(wc -c <<< "$line") > columns ))
-        then
-            (( numlines++ ))
-        fi
-    done
-
-    if [[ $USE_PROGRESS = 1 ]]
-    then
-        (( numlines++ ))
-        # account for progress bar being wider than the screen
-        if (( total_calls + 2 > columns ))
-        then
-            (( numlines++ ))
-        fi
-    fi
-
-    sleep "$sleeplen"
+  sleep "$sleeplen"
 done
