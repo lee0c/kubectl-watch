@@ -51,7 +51,7 @@ total_calls=60
 sleeplen=1
 
 # check args
-while [[ $# > 0 ]]
+while [[ $# -gt 0 ]]
 do
     case "$1" in
     -h|--help)
@@ -60,7 +60,7 @@ do
         ;;
     -c|--calls)
         shift
-        if [[ $# > 0 && $1 =~ ^[0-9]$ ]]
+        if [[ $# -gt 0 && $1 =~ ^[0-9]$ ]]
         then
             total_calls=$1
             if [[ $total_calls = 0 ]]; then USE_PROGRESS=0; fi
@@ -72,7 +72,7 @@ do
         ;;
     -s|--sleep)
         shift
-        if [[ $# > 0 && $1 =~ ^[0-9]$ ]]
+        if [[ $# -gt 0 && $1 =~ ^[0-9]$ ]]
         then
             sleeplen=$1
             shift
@@ -95,12 +95,12 @@ done
 calls_left=$total_calls
 
 prog_full="\u25A0"
-pad=$( printf "\u25A1%.0s" $( seq 1 $calls_left ) )
+pad=$(printf "\u25A1%.0s" "$(seq 1 "$calls_left")")
 
-if [[ ! $(echo -en $prog_full | wc -m) = 1 || $SIMPLE_PROGRESS = 1 ]]
+if [[ ! $(echo -en "$prog_full" | wc -m) = 1 || $SIMPLE_PROGRESS = 1 ]]
 then
     prog_full="#"
-    pad=$( printf ".%.0s" $( seq 1 $calls_left ) )
+    pad=$(printf ".%.0s" "$(seq 1 "$calls_left")")
 fi
 
 byte_size=$(echo -en $prog_full | wc -c)
@@ -114,18 +114,18 @@ do
         exit 0
     fi
 
-	columns=$(tput cols)
+    columns=$(tput cols)
 
     response=$(kubectl get "$@" 2>&1)
 
-	# read response into array of lines
-	lines=()
-	while IFS=\n read line
-	do
-		lines+=($line)
-	done <<< $response
-    
-	# backtrack to the top of the output
+    # read response into array of lines
+    lines=()
+    while IFS=$'\n' read -r line
+    do
+        lines+=("$line")
+    done <<< "$response"
+
+    # backtrack to the top of the output
     for (( ; numlines>0; numlines-- ))
     do
         echo -en "\r\e[1A\e[K"
@@ -137,17 +137,17 @@ do
     # create & print progress bar
     if [[ $USE_PROGRESS = 1 ]]
     then
-        progress="$progress$prog_full"
+        progress="${progress}${prog_full}"
         printf "[%b%0.*b]\n" "$progress" $(( --calls_left * byte_size )) "$pad"
     fi
 
     # calculate number of output lines
-    numlines=$(wc -l <<< $response)
+    numlines=$(wc -l <<< "$response")
 
     # account for output being wider than the screen
     for line in "${lines[@]}"
     do
-        if (( $(wc -c <<< $line) > columns ))
+        if (( $(wc -c <<< "$line") > columns ))
         then
             (( numlines++ ))
         fi
@@ -163,5 +163,5 @@ do
         fi
     fi
 
-    sleep $sleeplen 
+    sleep "$sleeplen"
 done
